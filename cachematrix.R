@@ -1,15 +1,45 @@
-## Put comments here that give an overall description of what your
-## functions do
+## Functions to demonstrate use of lexical scoping R to provide caching mechanism for matrix inversion calculation
 
-## Write a short comment describing this function
-
-makeCacheMatrix <- function(x = matrix()) {
-
+## function to creates a special "matrix" object that can cache its inverse.
+makeCacheMatrix <- function(x = matrix())
+{
+    ## i holds reference to matrix inversion result
+    i <- NULL
+    
+    ## set and get underlying matrix object
+    set <- function(y) {
+        x <<- y
+        i <<- NULL
+    }
+    get <- function() x
+    
+    ## functions to get or set cached result
+    setsolve <- function(solve) i <<- solve
+    getsolve <- function() i
+    
+    ## return functions via list to preserve environment
+    list(set = set, get = get,
+         setsolve = setsolve,
+         getsolve = getsolve)
 }
 
 
-## Write a short comment describing this function
-
-cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+## compute inverse of CacheMatrix object or return cached result
+cacheSolve <- function(x, ...)
+{
+    ## check to see if there is an existing cached result
+    i <- x$getsolve()
+    if(!is.null(i))
+    {
+        message("getting cached data")
+        return(i)
+    }
+    else
+    {
+        ## calculate, cache and return inverse of matrix
+        data <- x$get()
+        i <- solve(data, ...)
+        x$setsolve(i)
+        i
+    }
 }
